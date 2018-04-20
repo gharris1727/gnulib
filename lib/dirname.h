@@ -35,6 +35,8 @@
 extern "C" {
 #endif
 
+#define GNULIB_DIRNAME 0
+
 # if GNULIB_DIRNAME
 char *base_name (char const *file);
 char *dir_name (char const *file);

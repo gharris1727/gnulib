@@ -19,6 +19,12 @@
    dependent, and when mbrtowc returns (size_t)(-2). we throw the result
    away. */
 
+#include <string.h>
+#include <errno.h>
+
+int
+mbtowc (wchar_t *pwc, const char *s, size_t n);
+
 int
 mbtowc (wchar_t *pwc, const char *s, size_t n)
 {

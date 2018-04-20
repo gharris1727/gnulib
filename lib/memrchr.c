@@ -66,7 +66,7 @@ __memrchr (void const *s, int c_in, size_t n)
        n > 0 && (size_t) char_ptr % sizeof (longword) != 0;
        --n)
     if (*--char_ptr == c)
-      return (void *) char_ptr;
+      return (void *) (intptr_t) char_ptr;
 
   longword_ptr = (const longword *) char_ptr;
 
@@ -151,10 +151,10 @@ __memrchr (void const *s, int c_in, size_t n)
   while (n-- > 0)
     {
       if (*--char_ptr == c)
-        return (void *) char_ptr;
+        return (void *) (intptr_t) char_ptr;
     }
 
-  return NULL;
+  return (void*) 0;
 }
 #ifdef weak_alias
 weak_alias (__memrchr, memrchr)

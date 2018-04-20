@@ -22,7 +22,7 @@
 
 #include "verify.h"
 
-#if GNULIB_defined_mbstate_t
+#if 1 || GNULIB_defined_mbstate_t
 
 /* Platforms that lack mbsinit() also lack mbrlen(), mbrtowc(), mbsrtowcs()
    and wcrtomb(), wcsrtombs().

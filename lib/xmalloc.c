@@ -98,7 +98,7 @@ xcalloc (size_t n, size_t s)
      tests if HAVE_GNU_CALLOC, since GNU calloc never returns NULL if
      successful.  */
   if (xalloc_oversized (n, s)
-      || (! (p = calloc (n, s)) && (HAVE_GNU_CALLOC || n != 0)))
+      || (! (p = malloc (n*s)) && (HAVE_GNU_CALLOC || n != 0)))
     xalloc_die ();
   return p;
 }

@@ -31,6 +31,8 @@
 # define _GL_ATTRIBUTE_FORMAT(spec) /* empty */
 #endif
 
+#define GNULIB_PRINTF_ATTRIBUTE_FLAVOR_GNU 0
+
 /* On mingw, the flavor of printf depends on whether the extensions module
  * is in use; the check for <stdio.h> determines the witness macro.  */
 #ifndef _GL_ATTRIBUTE_SPEC_PRINTF

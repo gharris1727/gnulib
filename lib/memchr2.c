@@ -65,7 +65,7 @@ memchr2 (void const *s, int c1_in, int c2_in, size_t n)
     {
       char_ptr = void_ptr;
       if (*char_ptr == c1 || *char_ptr == c2)
-        return (void *) void_ptr;
+        return (void *) (intptr_t) void_ptr;
       void_ptr = char_ptr + 1;
     }
 
@@ -162,7 +162,7 @@ memchr2 (void const *s, int c1_in, int c2_in, size_t n)
   for (; n > 0; --n, ++char_ptr)
     {
       if (*char_ptr == c1 || *char_ptr == c2)
-        return (void *) char_ptr;
+        return (void *) (intptr_t) char_ptr;
     }
 
   return NULL;

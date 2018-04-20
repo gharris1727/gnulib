@@ -40,7 +40,7 @@ static bool
 is_using_utf8 (void)
 {
   wchar_t wc;
-  mbstate_t mbs = {0};
+  mbstate_t mbs = {{0}};
   return mbrtowc (&wc, "\xc4\x80", 2, &mbs) == 2 && wc == 0x100;
 }
 
@@ -58,7 +58,7 @@ init_localeinfo (struct localeinfo *localeinfo)
     {
       char c = i;
       unsigned char uc = i;
-      mbstate_t s = {0};
+      mbstate_t s = {{0}};
       wchar_t wc;
       size_t len = mbrtowc (&wc, &c, 1, &s);
       localeinfo->sbclen[uc] = len <= 1 ? 1 : - (int) - len;

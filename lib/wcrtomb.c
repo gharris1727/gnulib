@@ -23,7 +23,6 @@
 #include <errno.h>
 #include <stdlib.h>
 
-
 size_t
 wcrtomb (char *s, wchar_t wc, mbstate_t *ps)
 {

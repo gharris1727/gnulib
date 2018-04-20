@@ -19,13 +19,14 @@
 
 /* Specification.  */
 #include <wchar.h>
+#include <mbtowc-impl.h>
 
-#if C_LOCALE_MAYBE_EILSEQ
+#ifdef C_LOCALE_MAYBE_EILSEQ
 # include "hard-locale.h"
 # include <locale.h>
 #endif
 
-#if GNULIB_defined_mbstate_t
+#ifndef GNULIB_defined_mbstate_t
 /* Implement mbrtowc() on top of mbtowc().  */
 
 # include <errno.h>
@@ -46,6 +47,8 @@
 verify (sizeof (mbstate_t) >= 4);
 
 static char internal_state[4];
+
+int errno;
 
 size_t
 mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
@@ -104,7 +107,7 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
 
     /* Here m > 0.  */
 
-# if __GLIBC__ || defined __UCLIBC__
+# if defined __GLIBC__ || defined __UCLIBC__
     /* Work around bug <https://sourceware.org/bugzilla/show_bug.cgi?id=9674> */
     mbtowc (NULL, NULL, 0);
 # endif
@@ -138,7 +141,13 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
         goto invalid;
       /* Here MB_CUR_MAX > 1 and 0 < m < 4.  */
       {
-        const char *encoding = locale_charset ();
+        const char *encoding = 
+#if NO_LOCALE
+        "UTF-8";
+        NO_LOC_ERR;
+#else
+            locale_charset ();
+#endif
 
         if (STREQ_OPT (encoding, "UTF-8", 'U', 'T', 'F', '-', '8', 0, 0, 0, 0))
           {
@@ -338,12 +347,15 @@ mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
 # undef mbrtowc
 
 size_t
+rpl_mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps);
+
+size_t
 rpl_mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
 {
   size_t ret;
   wchar_t wc;
 
-# if MBRTOWC_NULL_ARG2_BUG || MBRTOWC_RETVAL_BUG || MBRTOWC_EMPTY_INPUT_BUG
+# if defined MBRTOWC_NULL_ARG2_BUG || defined MBRTOWC_RETVAL_BUG || defined MBRTOWC_EMPTY_INPUT_BUG
   if (s == NULL)
     {
       pwc = NULL;
@@ -352,7 +364,7 @@ rpl_mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
     }
 # endif
 
-# if MBRTOWC_EMPTY_INPUT_BUG
+# ifdef MBRTOWC_EMPTY_INPUT_BUG
   if (n == 0)
     return (size_t) -2;
 # endif
@@ -360,7 +372,7 @@ rpl_mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
   if (! pwc)
     pwc = &wc;
 
-# if MBRTOWC_RETVAL_BUG
+# ifdef MBRTOWC_RETVAL_BUG
   {
     static mbstate_t internal_state;
 
@@ -394,12 +406,12 @@ rpl_mbrtowc (wchar_t *pwc, const char *s, size_t n, mbstate_t *ps)
 
   ret = mbrtowc (pwc, s, n, ps);
 
-# if MBRTOWC_NUL_RETVAL_BUG
+# ifdef MBRTOWC_NUL_RETVAL_BUG
   if (ret < (size_t) -2 && !*pwc)
     return 0;
 # endif
 
-# if C_LOCALE_MAYBE_EILSEQ
+# ifdef C_LOCALE_MAYBE_EILSEQ
   if ((size_t) -2 <= ret && n != 0 && ! hard_locale (LC_CTYPE))
     {
       unsigned char uc = *s;
