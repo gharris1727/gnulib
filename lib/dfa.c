@@ -24,6 +24,7 @@
 
 #include "dfa.h"
 
+#include <_ctype.h>
 #include <assert.h>
 #include <ctype.h>
 #include <stdint.h>
@@ -586,6 +587,7 @@ accepts_in_context (int prev, int curr, state_num state, struct dfa const *dfa)
 
 static void regexp (struct dfa *dfa);
 
+#if !NO_LOCALE
 /* Store into *PWC the result of converting the leading bytes of the
    multibyte buffer S of length N bytes, using D->localeinfo.sbctowc
    and updating the conversion state in *D.  On conversion error,
@@ -624,6 +626,7 @@ mbs_to_wchar (wint_t *pwc, char const *s, size_t n, struct dfa *d)
   *pwc = wc;
   return 1;
 }
+#endif
 
 #ifdef DEBUG
 
@@ -940,6 +943,7 @@ using_simple_locale (bool multibyte)
     }
 }
 
+#if !NO_LOCALE
 /* Fetch the next lexical input character from the pattern.  There
    must at least one byte of pattern input.  Set DFA->lex.wctok to the
    value of the character or to WEOF depending on whether the input is
@@ -967,6 +971,7 @@ bracket_fetch_wc (struct dfa *dfa)
     dfaerror (_("unbalanced ["));
   return fetch_wc (dfa);
 }
+#endif
 
 typedef int predicate (int);
 
