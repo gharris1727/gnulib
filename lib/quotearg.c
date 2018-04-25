@@ -44,6 +44,8 @@
 #include <wchar.h>
 #include <wctype.h>
 
+extern int errno;
+
 #include "gettext.h"
 #define _(msgid) gettext (msgid)
 #define N_(msgid) msgid

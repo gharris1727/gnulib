@@ -587,7 +587,6 @@ accepts_in_context (int prev, int curr, state_num state, struct dfa const *dfa)
 
 static void regexp (struct dfa *dfa);
 
-#if !NO_LOCALE
 /* Store into *PWC the result of converting the leading bytes of the
    multibyte buffer S of length N bytes, using D->localeinfo.sbctowc
    and updating the conversion state in *D.  On conversion error,
@@ -626,7 +625,6 @@ mbs_to_wchar (wint_t *pwc, char const *s, size_t n, struct dfa *d)
   *pwc = wc;
   return 1;
 }
-#endif
 
 #ifdef DEBUG
 
@@ -898,14 +896,10 @@ static void
 __attribute__((unused))
 setbit_case_fold_c (int b, charclass *c)
 {
-#if NO_LOCALE
-  uprintf("%s:%d) locale info required\n", __FILE__, __LINE__);
-#else
   int ub = toupper (b);
   for (int i = 0; i < NOTCHAR; i++)
     if (toupper (i) == ub)
       setbit (i, c);
-#endif
 }
 
 /* Return true if the locale compatible with the C locale.  */
@@ -943,7 +937,6 @@ using_simple_locale (bool multibyte)
     }
 }
 
-#if !NO_LOCALE
 /* Fetch the next lexical input character from the pattern.  There
    must at least one byte of pattern input.  Set DFA->lex.wctok to the
    value of the character or to WEOF depending on whether the input is
@@ -971,7 +964,6 @@ bracket_fetch_wc (struct dfa *dfa)
     dfaerror (_("unbalanced ["));
   return fetch_wc (dfa);
 }
-#endif
 
 typedef int predicate (int);
 
@@ -987,7 +979,6 @@ struct dfa_ctype
 };
 
 static const struct dfa_ctype prednames[] = {
-#if !NO_LOCALE
   {"alpha", isalpha, false},
   {"upper", isupper, false},
   {"lower", islower, false},
@@ -1000,7 +991,6 @@ static const struct dfa_ctype prednames[] = {
   {"graph", isgraph, false},
   {"cntrl", iscntrl, false},
   {"blank", isblank, false},
-#endif
   {NULL, NULL, false}
 };
 
@@ -1028,12 +1018,6 @@ parse_bracket_exp (struct dfa *dfa)
      Bit 2 = includes any other character but a colon.
      Bit 3 = includes ranges, char/equiv classes or collation elements.  */
   int colon_warning_state;
-
-#if NO_LOCALE
-  if (dfa->syntax.case_fold) {
-    uprintf("%s,%d) locale information required\n", __FILE__, __LINE__);
-  }
-#endif
 
   dfa->lex.brack.nchars = 0;
   charclass ccl;
@@ -1092,14 +1076,10 @@ parse_bracket_exp (struct dfa *dfa)
                    but the regex code does not support that, so do not
                    worry about that possibility.  */
                 {
-#if NO_LOCALE
-                  char const *class = str;
-#else
                   char const *class
                     = (dfa->syntax.case_fold && (streq (str, "upper")
                                                  || streq (str, "lower"))
                        ? "alpha" : str);
-#endif
                   const struct dfa_ctype *pred = find_pred (class);
                   if (!pred)
                     dfaerror (_("invalid character class"));
@@ -1181,11 +1161,9 @@ parse_bracket_exp (struct dfa *dfa)
                       || (isasciidigit (c) & isasciidigit (c2)))
                     {
                       for (int ci = c; ci <= c2; ci++)
-#if !NO_LOCALE
                         if (dfa->syntax.case_fold && isalpha (ci))
                           setbit_case_fold_c (ci, &ccl);
                         else
-#endif
                           setbit (ci, &ccl);
                     }
                   else
@@ -1200,11 +1178,9 @@ parse_bracket_exp (struct dfa *dfa)
 
       if (!dfa->localeinfo.multibyte)
         {
-#if !NO_LOCALE
           if (dfa->syntax.case_fold && isalpha (c))
             setbit_case_fold_c (c, &ccl);
           else
-#endif
             setbit (c, &ccl);
           continue;
         }
@@ -1213,7 +1189,6 @@ parse_bracket_exp (struct dfa *dfa)
         known_bracket_exp = false;
       else
         {
-#if 0
           wchar_t folded[CASE_FOLDED_BUFSIZE + 1];
           unsigned int n = (dfa->syntax.case_fold
                             ? case_folded_counterparts (wc, folded + 1) + 1
@@ -1228,9 +1203,6 @@ parse_bracket_exp (struct dfa *dfa)
                                    sizeof *dfa->lex.brack.chars);
                 dfa->lex.brack.chars[dfa->lex.brack.nchars++] = folded[i];
               }
-#else
-              uprintf("DISABLED FEATURE: case_folded_counterparts in %s\n", __FUNCTION__);
-#endif
         }
     }
   while ((wc = wc1, (c = c1) != ']'));
@@ -1534,9 +1506,6 @@ lex (struct dfa *dfa)
             goto normal_char;
           if (!dfa->localeinfo.multibyte)
             {
-#if NO_LOCALE
-              uprintf("%s:%d) locale information needed\n", __FILE__, __LINE__);
-#else
               charclass ccl;
               zeroset (&ccl);
               for (int c2 = 0; c2 < NOTCHAR; ++c2)
@@ -1546,7 +1515,6 @@ lex (struct dfa *dfa)
                 notset (&ccl);
               dfa->lex.laststart = false;
               return dfa->lex.lasttok = CSET + charclass_index (dfa, &ccl);
-#endif
             }
 
           /* FIXME: see if optimizing this, as is done with ANYCHAR and
@@ -1613,11 +1581,6 @@ lex (struct dfa *dfa)
           if (dfa->localeinfo.multibyte)
             return dfa->lex.lasttok = WCHAR;
 
-#if NO_LOCALE
-          if (dfa->syntax.case_fold) {
-            uprintf("%s,%d) need locale information\n", __FILE__, __LINE__);
-          }
-#else
           if (dfa->syntax.case_fold && isalpha (c))
             {
               charclass ccl;
@@ -1625,7 +1588,6 @@ lex (struct dfa *dfa)
               setbit_case_fold_c (c, &ccl);
               return dfa->lex.lasttok = CSET + charclass_index (dfa, &ccl);
             }
-#endif
 
           return dfa->lex.lasttok = c;
         }
@@ -1725,13 +1687,8 @@ static void
 addtok_wc (struct dfa *dfa, wint_t wc)
 {
   unsigned char buf[MB_LEN_MAX];
-#if NO_LOCALE
-  NO_LOC_ERR;
-  size_t stored_bytes = 1;
-#else
   mbstate_t s = { {0} };
   size_t stored_bytes = wcrtomb ((char *) buf, wc, &s);
-#endif
 
   if (stored_bytes != (size_t) -1)
     dfa->lex.cur_mb_len = stored_bytes;
@@ -1856,7 +1813,6 @@ atom (struct dfa *dfa)
 
           if (dfa->syntax.case_fold)
             {
-#if 0
               wchar_t folded[CASE_FOLDED_BUFSIZE];
               unsigned int n = case_folded_counterparts (dfa->lex.wctok,
                                                          folded);
@@ -1865,9 +1821,6 @@ atom (struct dfa *dfa)
                   addtok_wc (dfa, folded[i]);
                   addtok (dfa, OR);
                 }
-#else
-              uprintf("DISABLED FEATURE: case_folded_counterparts in %s\n", __FUNCTION__);
-#endif
             }
         }
 
@@ -3833,12 +3786,6 @@ dfamust (struct dfa const *d)
   bool need_endline = false;
   bool case_fold_unibyte = d->syntax.case_fold && MB_CUR_MAX == 1;
 
-#if NO_LOCALE
-  if (case_fold_unibyte) {
-    uprintf("%s,%d) locale information needed.\n", __FILE__, __LINE__);
-  }
-#endif
-
   for (size_t ri = 0; ri < d->tindex; ++ri)
     {
       token t = d->tokens[ri];
@@ -4005,11 +3952,7 @@ dfamust (struct dfa const *d)
               while (++j < NOTCHAR)
                 if (tstbit (j, ccl)
                     && ! (case_fold_unibyte
-#if NO_LOCALE
-                          && j == t
-#else
                           && toupper (j) == toupper (t)
-#endif
                             ))
                   break;
               if (j < NOTCHAR)
@@ -4032,11 +3975,7 @@ dfamust (struct dfa const *d)
             }
           mp = allocmust (mp, ((rj - ri) >> 1) + 1);
           mp->is[0] = mp->left[0] = mp->right[0]
-#if NO_LOCALE
-            = t;
-#else
             = case_fold_unibyte ? toupper (t) : t;
-#endif
 
           size_t i;
           for (i = 1; ri + 2 < rj; i++)
@@ -4044,11 +3983,7 @@ dfamust (struct dfa const *d)
               ri += 2;
               t = d->tokens[ri];
               mp->is[i] = mp->left[i] = mp->right[i]
-#if NO_LOCALE
-                = t;
-#else
                 = case_fold_unibyte ? toupper (t) : t;
-#endif
             }
           mp->is[i] = mp->left[i] = mp->right[i] = '\0';
           mp->in = enlist (mp->in, mp->is, i);
