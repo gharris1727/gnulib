@@ -23,6 +23,9 @@
 #include <stdbool.h>
 #include <wchar.h>
 
+#ifndef LOCALEINFO_H
+#define LOCALEINFO_H
+
 struct localeinfo
 {
   /* MB_CUR_MAX > 1.  */
@@ -52,3 +55,5 @@ extern void init_localeinfo (struct localeinfo *);
 enum { CASE_FOLDED_BUFSIZE = 32 };
 
 extern int case_folded_counterparts (wint_t, wchar_t[CASE_FOLDED_BUFSIZE]);
+
+#endif
