@@ -1534,7 +1534,6 @@ re_acquire_state_context (reg_errcode_t *err, const re_dfa_t *dfa,
   for (i = 0 ; i < spot->num ; i++)
     {
       re_dfastate_t *state = spot->array[i];
-      uprintf("spot->array[i]: %p\n", state);
       if (state->hash == hash
 	  && state->context == context
 	  && re_node_set_compare (state->entrance_nodes, nodes))
