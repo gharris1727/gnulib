@@ -840,7 +840,7 @@ static reg_errcode_t
 init_dfa (re_dfa_t *dfa, size_t pat_len)
 {
   __re_size_t table_size;
-#ifndef _LIBC
+#ifndef _KERNEL
   const char *codeset_name;
 #endif
 #ifdef RE_ENABLE_I18N
@@ -904,7 +904,7 @@ init_dfa (re_dfa_t *dfa, size_t pat_len)
   if (dfa->mb_cur_max > 1)
     {
       if (dfa->is_utf8)
-	dfa->sb_char = (re_bitset_ptr_t) utf8_sb_map;
+	dfa->sb_char = (re_bitset_ptr_t) (long) utf8_sb_map;
       else
 	{
 	  int i, j, ch;

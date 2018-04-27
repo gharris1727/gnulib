@@ -127,6 +127,11 @@ get_charset_aliases (void)
   const char *cp;
 
   cp = charset_aliases;
+
+#ifdef _KERNEL
+  cp = "";
+#else
+
   if (cp == NULL)
     {
 #if !(defined DARWIN7 || defined VMS || defined WINDOWS_NATIVE || defined __CYGWIN__ || defined OS2)
@@ -380,6 +385,7 @@ get_charset_aliases (void)
 
       charset_aliases = cp;
     }
+#endif
 
   return cp;
 }

@@ -54,7 +54,7 @@ re_string_allocate (re_string_t *pstr, const char *str, Idx len, Idx init_len,
 
   pstr->word_char = dfa->word_char;
   pstr->word_ops_used = dfa->word_ops_used;
-  pstr->mbs = pstr->mbs_allocated ? pstr->mbs : (unsigned char *) str;
+  pstr->mbs = pstr->mbs_allocated ? pstr->mbs : (unsigned char *) (long) str;
   pstr->valid_len = (pstr->mbs_allocated || dfa->mb_cur_max > 1) ? 0 : len;
   pstr->valid_raw_len = pstr->valid_len;
   return REG_NOERROR;
@@ -77,7 +77,7 @@ re_string_construct (re_string_t *pstr, const char *str, Idx len,
       if (BE (ret != REG_NOERROR, 0))
 	return ret;
     }
-  pstr->mbs = pstr->mbs_allocated ? pstr->mbs : (unsigned char *) str;
+  pstr->mbs = pstr->mbs_allocated ? pstr->mbs : (unsigned char *) (long) str;
 
   if (icase)
     {
@@ -504,7 +504,7 @@ re_string_skip_chars (re_string_t *pstr, Idx new_raw_idx, wint_t *last_wc)
 	  if (mbclen == 0 || remain_len == 0)
 	    wc = L'\0';
 	  else
-	    wc = *(unsigned char *) (pstr->raw_mbs + rawbuf_idx);
+	    wc = *(unsigned char *) (long) (pstr->raw_mbs + rawbuf_idx);
 	  mbclen = 1;
 	  pstr->cur_state = prev_st;
 	}
@@ -584,7 +584,7 @@ re_string_reconstruct (re_string_t *pstr, Idx idx, int eflags)
       pstr->tip_context = ((eflags & REG_NOTBOL) ? CONTEXT_BEGBUF
 			   : CONTEXT_NEWLINE | CONTEXT_BEGBUF);
       if (!pstr->mbs_allocated)
-	pstr->mbs = (unsigned char *) pstr->raw_mbs;
+	pstr->mbs = (unsigned char *) (long) pstr->raw_mbs;
       offset = idx;
     }
 
@@ -1534,6 +1534,7 @@ re_acquire_state_context (reg_errcode_t *err, const re_dfa_t *dfa,
   for (i = 0 ; i < spot->num ; i++)
     {
       re_dfastate_t *state = spot->array[i];
+      uprintf("spot->array[i]: %p\n", state);
       if (state->hash == hash
 	  && state->context == context
 	  && re_node_set_compare (state->entrance_nodes, nodes))

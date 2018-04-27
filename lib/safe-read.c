@@ -29,9 +29,6 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include <sys/proc.h>
-#include <sys/syscallsubr.h>
-#include <sys/file.h>
 #include <errno.h>
 
 #ifdef EINTR
@@ -44,10 +41,10 @@
 
 #ifdef SAFE_WRITE
 # define safe_rw safe_write
-# define rw kern_pwrite
+# define rw write
 #else
 # define safe_rw safe_read
-# define rw kern_pread
+# define rw read
 # undef const
 # define const /* empty */
 #endif
@@ -56,7 +53,7 @@
    interrupted.  Return the actual number of bytes read(written), zero for EOF,
    or SAFE_READ_ERROR(SAFE_WRITE_ERROR) upon error.  */
 size_t
-safe_rw (struct thread *td, int fd, void const *buf, size_t count, size_t offset)
+safe_rw (int fd, void const *buf, size_t count)
 {
   /* Work around a bug in Tru64 5.1.  Attempting to read more than
      INT_MAX bytes fails with errno == EINVAL.  See
@@ -66,8 +63,7 @@ safe_rw (struct thread *td, int fd, void const *buf, size_t count, size_t offset
 
   for (;;)
     {
-      ssize_t result = rw (td, fd, buf, count, offset);
-      int errno = td->td_errno;
+      ssize_t result = rw (fd, buf, count);
 
       if (0 <= result)
         return result;

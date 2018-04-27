@@ -24,7 +24,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-
 /* 1 if calloc is known to be compatible with GNU calloc.  This
    matters if we are not also using the calloc module, which defines
    HAVE_CALLOC_GNU and supports the GNU API even on non-GNU platforms.  */
@@ -99,9 +98,8 @@ xcalloc (size_t n, size_t s)
      tests if HAVE_GNU_CALLOC, since GNU calloc never returns NULL if
      successful.  */
   if (xalloc_oversized (n, s)
-      || (! (p = malloc (n*s)) && (HAVE_GNU_CALLOC || n != 0)))
+      || (! (p = calloc (n, s)) && (HAVE_GNU_CALLOC || n != 0)))
     xalloc_die ();
-  memset(p, 0, n*s);
   return p;
 }
 
