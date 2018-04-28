@@ -28,7 +28,7 @@
    included after this file.  Likewise for <sys/param.h>.
    If more than one of these system headers define MIN and MAX, pick just
    one of the headers (because the definitions most likely are the same).  */
-#if HAVE_MINMAX_IN_LIMITS_H
+#if defined HAVE_MINMAX_IN_LIMITS_H && HAVE_MINMAX_IN_LIMITS_H
 # include <limits.h>
 #elif HAVE_MINMAX_IN_SYS_PARAM_H
 # include <sys/param.h>
