@@ -139,7 +139,7 @@ m4_defun([gl_MANYWARN_ALL_GCC(C)],
     -Wdesignated-init \
     -Wdisabled-optimization \
     -Wdiscarded-array-qualifiers \
-    -Wdiscarded-qualifiers \
+    -Wno-discarded-qualifiers \
     -Wdiv-by-zero \
     -Wdouble-promotion \
     -Wduplicated-branches \
@@ -226,7 +226,6 @@ m4_defun([gl_MANYWARN_ALL_GCC(C)],
     -Wstrict-prototypes \
     -Wsuggest-attribute=const \
     -Wsuggest-attribute=format \
-    -Wsuggest-attribute=noreturn \
     -Wsuggest-attribute=pure \
     -Wsuggest-final-methods \
     -Wsuggest-final-types \
