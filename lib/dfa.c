@@ -860,7 +860,7 @@ charclass_index (struct dfa *d, charclass *s)
 static bool
 unibyte_word_constituent (struct dfa const *dfa, unsigned char c)
 {
-  return dfa->localeinfo.sbctowc[c] != WEOF && (/*isalnum (c) || */(c) == '_');
+  return dfa->localeinfo.sbctowc[c] != WEOF && (isalnum (c) || (c) == '_');
 }
 
 static int
@@ -879,7 +879,6 @@ char_context (struct dfa const *dfa, unsigned char c)
    dotless i/dotted I are not included in the chosen character set.
    Return whether a bit was set in the charclass.  */
 static bool
-__attribute__((unused))
 setbit_wc (wint_t wc, charclass *c)
 {
   int b = wctob (wc);
@@ -893,7 +892,6 @@ setbit_wc (wint_t wc, charclass *c)
 /* Set a bit for B and its case variants in the charclass C.
    MB_CUR_MAX must be 1.  */
 static void
-__attribute__((unused))
 setbit_case_fold_c (int b, charclass *c)
 {
   int ub = toupper (b);
@@ -3952,8 +3950,7 @@ dfamust (struct dfa const *d)
               while (++j < NOTCHAR)
                 if (tstbit (j, ccl)
                     && ! (case_fold_unibyte
-                          && toupper (j) == toupper (t)
-                            ))
+                          && toupper (j) == toupper (t)))
                   break;
               if (j < NOTCHAR)
                 {

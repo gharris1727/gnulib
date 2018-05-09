@@ -840,7 +840,7 @@ static reg_errcode_t
 init_dfa (re_dfa_t *dfa, size_t pat_len)
 {
   __re_size_t table_size;
-#ifndef HAVE_LANGINFO_CODESET
+#if HAVE_LANGINFO_CODESET
   const char *codeset_name;
 #endif
 #ifdef RE_ENABLE_I18N
@@ -886,7 +886,7 @@ init_dfa (re_dfa_t *dfa, size_t pat_len)
   dfa->map_notascii = (_NL_CURRENT_WORD (LC_CTYPE, _NL_CTYPE_MAP_TO_NONASCII)
 		       != 0);
 #else
-#ifndef HAVE_LANGINFO_CODESET
+#if HAVE_LANGINFO_CODESET
   codeset_name = nl_langinfo (CODESET);
   if ((codeset_name[0] == 'U' || codeset_name[0] == 'u')
       && (codeset_name[1] == 'T' || codeset_name[1] == 't')
